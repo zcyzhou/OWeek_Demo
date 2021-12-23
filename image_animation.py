@@ -48,7 +48,7 @@ if not os.path.exists('output'):
 
 relative=True
 adapt_movement_scale=True
-cpu=True
+cpu = False if torch.cuda.is_available() else True
 
 if video_path:
     cap = cv2.VideoCapture(video_path) 
