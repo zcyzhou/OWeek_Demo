@@ -1,8 +1,9 @@
 import os
-from threading import Thread
 import cv2
 import sys
 import time
+import glob
+from matplotlib import image
 import torch
 import imageio
 import qimage2ndarray
@@ -18,7 +19,11 @@ from demo import load_checkpoints
 from skimage import img_as_ubyte
 from skimage.transform import resize
 
-image_paths = ['Inputs/feynman.jpeg', 'Inputs/Monalisa.png', 'Inputs/orlando_bloom.jpg']
+
+image_paths = []
+for data_path in glob.glob('Inputs' + '/*'):
+    image_paths.append(data_path)
+# sys.exit()
 
 image_source = image_paths[0]
 checkpoint_path = "./checkpoints/vox-cpk.pth.tar"
@@ -32,39 +37,30 @@ class MainWindow(QWidget):
 
         self.VBL = QVBoxLayout(self)
         self.HBL = QHBoxLayout()
-        self.VBL1 = QVBoxLayout()
-        self.VBL2 = QVBoxLayout()
-        self.VBL3 = QVBoxLayout()
         self.VBL.addLayout(self.HBL)
-        self.HBL.addLayout(self.VBL1)
-        self.HBL.addLayout(self.VBL2)
-        self.HBL.addLayout(self.VBL3)
+        
+        self.VBLS = []
+        for i in range(len(image_paths)):
+            self.VBLS.append(QVBoxLayout())
+            self.HBL.addLayout(self.VBLS[i])
 
         # widget for video
         self.FeedLabel = QLabel()
         self.VBL.addWidget(self.FeedLabel)
 
         # widget for image preview
-        self.ImagePreview1 = QLabel()
-        self.ImagePreview2 = QLabel()
-        self.ImagePreview3 = QLabel()
-        self.ImagePreview1.setPixmap(QPixmap(image_paths[0]).scaled(256, 256))
-        self.ImagePreview2.setPixmap(QPixmap(image_paths[1]).scaled(256, 256))
-        self.ImagePreview3.setPixmap(QPixmap(image_paths[2]).scaled(256, 256))
-        self.VBL1.addWidget(self.ImagePreview1)
-        self.VBL2.addWidget(self.ImagePreview2)
-        self.VBL3.addWidget(self.ImagePreview3)
+        self.ImagePreviews = []
+        for i in range(len(image_paths)):
+            self.ImagePreviews.append(QLabel())
+            self.ImagePreviews[i].setPixmap(QPixmap(image_paths[i]).scaled(256, 256))
+            self.VBLS[i].addWidget(self.ImagePreviews[i])
 
         # Add button for each image preview
-        self.BTN1 = QPushButton(image_paths[0].split('/')[-1])
-        self.BTN1.clicked.connect(self.ChooseFirst)
-        self.BTN2 = QPushButton(image_paths[1].split('/')[-1])
-        self.BTN2.clicked.connect(self.ChooseSecond)
-        self.BTN3 = QPushButton(image_paths[2].split('/')[-1])
-        self.BTN3.clicked.connect(self.ChooseThird)
-        self.VBL1.addWidget(self.BTN1)
-        self.VBL2.addWidget(self.BTN2)
-        self.VBL3.addWidget(self.BTN3)
+        self.BTNS = []
+        for i in range(len(image_paths)):
+            self.BTNS.append(QPushButton(image_paths[i].split('/')[-1]))
+            self.BTNS[i].clicked.connect(self.ChooseIdx(i))
+            self.VBLS[i].addWidget(self.BTNS[i])
 
         # Add Stop button
         self.CancelBTN = QPushButton("Stop")
@@ -82,6 +78,15 @@ class MainWindow(QWidget):
     
     def CancelFeed(self):
         self.worker1.stop()
+    
+    def ChooseIdx(self, idx):
+        def Choose():
+            global ThreadActive
+            global image_source
+            ThreadActive = False
+            image_source = image_paths[idx]
+        return Choose
+
     
     def ChooseFirst(self):
         # self.worker1.stop()
