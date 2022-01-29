@@ -1,8 +1,30 @@
 # O-Week Demo
 
 ## Run
+### Environment setup
+To run the code, please first make sure you have all required packages installed. If you use `conda`, then just run (replace `<env>` with a proper environment name).
+```
+conda create --name <env> --file requirements.txt
+```
 
-To Run the demo with a rough GUI, use
+or 
+
+*This would set the name of the new environment as `ml`*
+```
+conda env create -f ml.yml
+```
+
+After installed the environment, you can use `conda activate <env>` to activate the environment.
+
+Then, remember to install `PyQt5`, you can use
+```
+conda install -c anaconda pyqt
+```
+
+You can also install all the required packages mannually by `pip`.
+
+### Run the Application
+To run the application with GUI, use
 ```
 python oweek_demo.py
 ```
